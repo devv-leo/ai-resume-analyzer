@@ -44,7 +44,7 @@ const Upload = () => {
         }
         await kv.set(`resume:${uuid}`, JSON.stringify(data));
 
-        setStatusText('Analyzing...');
+        setStatusText('Analyzing. This might take a minute...');
 
         const feedback = await ai.feedback(
             uploadedFile.path,

@@ -23,18 +23,24 @@ export default function Home() {
 
   useEffect(() => {
     const loadResumes = async () => {
-        setLoadingResumes(true);
-        const resumes = (await kv.list('resume:*', true)) as KVItem[];
+        try {
+          setLoadingResumes(true);
+          const resumes = (await kv.list('resume:*', true)) as KVItem[] | undefined;
 
-        const parsedResumes = resumes?.map((resume) => (
-            JSON.parse(resume.value) as Resume
-        ))
+          const parsedResumes = (resumes || []).map((r) => JSON.parse((r as any).value) as Resume);
 
-        console.log("parsedResumes", parsedResumes);
-        setResumes(parsedResumes);
-        setLoadingResumes(false);
-    }
-  }, [])
+          console.log("parsedResumes", parsedResumes);
+          setResumes(parsedResumes || []);
+        } catch (err) {
+          console.error("Failed to load resumes", err);
+          setResumes([]);
+        } finally {
+          setLoadingResumes(false);
+        }
+    };
+
+    loadResumes();
+  }, [kv])
   
   return <main className="bg-[url('/images/bg-main.svg')] bg-cover">
     <Navbar />
@@ -49,7 +55,7 @@ export default function Home() {
       </div>
 
       {loadingResumes && (
-        <div>
+        <div className="flex flex-col items-center justify-center">
           <img src="/images/resume-scan-2.gif" className="w-[200px]" alt="loading scanner" />
         </div>
       )}
